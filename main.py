@@ -1,150 +1,45 @@
 import os
-import cv2
 import numpy as np
-import numba
+import cv2
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-
-import tensorflow as tf
-from tensorflow import keras  # Keras is the high-level API of TensorFlow 2
-from tensorflow.keras import layers
-from keras._tf_keras.keras.preprocessing.image import load_img, save_img, array_to_img, img_to_array, ImageDataGenerator
-
-# Create global variable saved_counter intialized to 0
-saved_counter = 0
+from keras._tf_keras.keras.preprocessing.image import load_img, img_to_array
+from augmentation import ImageDataAugmentation  # Custom augmentation class
+from keras._tf_keras.keras.preprocessing.image import save_img
 
 
-def save_image(image):
-    """Save image to dataset/augmented folder"""
-    global saved_counter
+def get_dataset_from_video(video):
+    """Get dataset from video file"""
+    video = cv2.VideoCapture(video)
+    dataset = []
+    saved_counter = 0
 
-    filename = f"augmented{saved_counter}.jpg"
-    if not os.path.exists('augmented_dataset'):
-        os.makedirs('augmented_dataset')
-    if os.path.exists(f'augmented_dataset/{filename}'):
-        os.remove(f'augmented_dataset/{filename}')
+    while video.isOpened():
+        ret, frame = video.read()
+        if not ret:
+            break
 
-    save_img(f'augmented_dataset/{filename}', image)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        dataset.append(frame)
 
-    saved_counter += 1
-    pass
+        filename = f"frame{saved_counter}.jpg"
+        if not os.path.exists('dataset'):
+            os.makedirs('dataset')
+        if os.path.exists(f'dataset/{filename}'):
+            os.remove(f'dataset/{filename}')
 
+        save_img(f'dataset/{filename}', frame)
 
-class ImageDataAugmentation:
-    """
-    Rotation - Applies both left and right.
-    Horizontal shift - Put negative number for left and positive for right shift.
-    Vertical shift - Put negative number for up and positive for down shift.
-    Zoom - Zoom in the image.
-    Brightness - Negative number for decrease and positive for increase.
-    """
-    dataset = None
-    rotation = 0
-    horizontal_shift = 0.1
-    vertical_shift = -0.0
-    zoom = 0
-    brightness = 0
+        saved_counter += 1
 
-    def __init__(self, images, rotation=15, horizontal_shift=0.15, vertical_shift=-0.15, zoom=30, brightness=75):
-        self.dataset = images
-        self.rotation = rotation
-        self.horizontal_shift = horizontal_shift
-        self.vertical_shift = vertical_shift
-        self.zoom = zoom
-        self.brightness = brightness
-        pass
+    video.release()
 
-    def augment(self):
-        """Augment the images in the dataset"""
-        for image in dataset:
-            # Rotate right and left
-            self.rotate_left_and_right(image)
-            # Horizontal shift and vertical shift
-            self.shift_horizontaly_and_verticaly(image)
-            # Zoom
-            self.zoom_image(image)
-            # Flip
-            self.flip(image)
-            # Decrease brightness
-            self.adjust_brightness(image)
-        pass
-
-    def rotate_left_and_right(self, image):
-        """Rotate image to right for right_rotation degrees and save to dataset/augmented folder"""
-        height, width = image.shape[:2]
-        # center coordinates of the image
-        centerX, centerY = (width // 2, height // 2)
-        # 1.0 scales the image to the same dimensions as original
-        right_rotation_matrix = cv2.getRotationMatrix2D((centerX, centerY), self.rotation, 1.0)
-        left_rotation_matrix = cv2.getRotationMatrix2D((centerX, centerY), -self.rotation, 1.0)
-
-        right_rotated_image = cv2.warpAffine(image, right_rotation_matrix, (width, height))
-        left_rotated_image = cv2.warpAffine(image, left_rotation_matrix, (width, height))
-
-        save_image(right_rotated_image)
-        save_image(left_rotated_image)
-        pass
-
-    def shift_horizontaly_and_verticaly(self, image):
-        """Shift image horizontally and vertically for shift percentage"""
-        height, width = image.shape[:2]
-
-        translation_matrix = np.float32([[1, 0, self.horizontal_shift * width], [0, 1, self.vertical_shift * height]])
-        translated_image = cv2.warpAffine(image, translation_matrix, (width, height))
-
-        save_image(translated_image)
-        pass
-
-    def zoom_image(self, image):
-        """Zoom image for zoom percentage"""
-        height, width = image.shape[:2]
-        x1 = self.zoom
-        x2 = width - x1 * 2
-        y1 = self.zoom
-        y2 = height - y1 * 2
-        cropped = image[y1:y2, x1:x2]
-        zoomed_image = cv2.resize(cropped, (image.shape[1], image.shape[0]), interpolation=cv2.INTER_CUBIC)
-        save_image(zoomed_image)
-        pass
-
-    def flip(self, image):
-        """Flip image horizontally"""
-        # Flip code 0 = horizontal flip
-        # Flip code 1 = vertical flip
-        image = cv2.flip(image, flipCode=1)
-        save_image(image)
-        pass
-
-    def adjust_brightness(self, image):
-        hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
-        h, s, v = cv2.split(hsv)
-
-        lim = 255 - self.brightness
-        v[v > lim] = 255
-        v[v <= lim] += self.brightness
-
-        final_hsv = cv2.merge((h, s, v))
-        image = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
-        save_image(image)
-        pass
+    dataset = np.array(dataset)
+    return dataset
 
 
 if __name__ == "__main__":
     # Load data from dataset folder and save to array
-    dataset = []
-    i = 0
-    for file in os.listdir(f"dataset"):
-        if i == 0:
-            print(file)
-        image = load_img(f"dataset/{file}")
-        image = img_to_array(image)
-        dataset.append(image)
-        i += 1
-
-    dataset = np.array(dataset)
-    print(dataset.size)
-    print(dataset.shape)
-    print(dataset[0].shape)
+    dataset = get_dataset_from_video("face_recognition.mp4")
 
     augmentor = ImageDataAugmentation(dataset)
 
