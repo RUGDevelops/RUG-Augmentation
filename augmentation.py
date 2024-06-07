@@ -1,29 +1,28 @@
 import os
 import cv2
 import numpy as np
-import numba
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-import tensorflow as tf
-from tensorflow import keras  # Keras is the high-level API of TensorFlow 2
 from keras._tf_keras.keras.preprocessing.image import save_img
 
 # Create global variable saved_counter intialized to 0
 saved_counter = 0
+user_name = "Rene Jausovec"
 
 
 def save_image(image):
     """Save image to dataset/augmented folder"""
     global saved_counter
+    global user_name
 
-    filename = f"augmented{saved_counter}.jpg"
-    if not os.path.exists('augmented_dataset'):
-        os.makedirs('augmented_dataset')
-    if os.path.exists(f'augmented_dataset/{filename}'):
-        os.remove(f'augmented_dataset/{filename}')
+    filename = f"{user_name.replace(' ', '_')}{saved_counter}.jpg"
+    if not os.path.exists(f'dataset/{user_name}'):
+        os.makedirs(f'dataset/{user_name}')
+    if os.path.exists(f'dataset/{user_name}/{filename}'):
+        os.remove(f'dataset/{user_name}/{filename}')
 
-    save_img(f'augmented_dataset/{filename}', image)
+    save_img(f'dataset/{user_name}/{filename}', image, )
 
     saved_counter += 1
     pass
@@ -44,7 +43,7 @@ class ImageDataAugmentation:
     zoom = 0
     brightness = 0
 
-    def __init__(self, images, rotation=15, horizontal_shift=0.15, vertical_shift=-0.15, zoom=30, brightness=75):
+    def __init__(self, images, rotation=15, horizontal_shift=0.15, vertical_shift=-0.15, zoom=30, brightness=50):
         self.dataset = images
         self.rotation = rotation
         self.horizontal_shift = horizontal_shift
@@ -56,10 +55,13 @@ class ImageDataAugmentation:
     def augment(self):
         """Augment the images in the dataset"""
         for image in self.dataset:
+            # Resize all images to 160x160 for best training results
+            # image = cv2.resize(image, (160, 160))
+            image = np.array(image, dtype=np.uint8)
             # Rotate right and left
             self.rotate_left_and_right(image)
             # Horizontal shift and vertical shift
-            self.shift_horizontaly_and_verticaly(image)
+            # self.shift_horizontaly_and_verticaly(image)
             # Zoom
             self.zoom_image(image)
             # Flip
@@ -115,7 +117,6 @@ class ImageDataAugmentation:
         pass
 
     def adjust_brightness(self, image):
-        """Adjust brightness of the image by brightness percentage"""
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         h, s, v = cv2.split(hsv)
 
