@@ -1,0 +1,11 @@
+
+keras
+numpy
+opencv-python
+flask
+
+--find-links https://download.pytorch.org/whl/cu121
+torch
+torchvision
+torchaudio
+facenet-pytorch
