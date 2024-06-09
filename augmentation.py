@@ -8,13 +8,12 @@ from keras._tf_keras.keras.preprocessing.image import save_img
 
 # Create global variable saved_counter intialized to 0
 saved_counter = 0
-user_name = "Rene Jausovec"
+# user_name = "Rene Jausovec"
 
 
-def save_image(image):
+def save_image(image, user_name):
     """Save image to dataset/augmented folder"""
     global saved_counter
-    global user_name
 
     filename = f"{user_name.replace(' ', '_')}{saved_counter}.jpg"
     if not os.path.exists(f'dataset/{user_name}'):
@@ -43,13 +42,14 @@ class ImageDataAugmentation:
     zoom = 0
     brightness = 0
 
-    def __init__(self, images, rotation=15, horizontal_shift=0.15, vertical_shift=-0.15, zoom=30, brightness=50):
+    def __init__(self, images, user_name, rotation=15, horizontal_shift=0.15, vertical_shift=-0.15, zoom=30, brightness=50):
         self.dataset = images
         self.rotation = rotation
         self.horizontal_shift = horizontal_shift
         self.vertical_shift = vertical_shift
         self.zoom = zoom
         self.brightness = brightness
+        self.user_name = user_name
         pass
 
     def augment(self):
@@ -82,8 +82,8 @@ class ImageDataAugmentation:
         right_rotated_image = cv2.warpAffine(image, right_rotation_matrix, (width, height))
         left_rotated_image = cv2.warpAffine(image, left_rotation_matrix, (width, height))
 
-        save_image(right_rotated_image)
-        save_image(left_rotated_image)
+        save_image(right_rotated_image, self.user_name)
+        save_image(left_rotated_image, self.user_name)
         pass
 
     def shift_horizontaly_and_verticaly(self, image):
@@ -105,7 +105,7 @@ class ImageDataAugmentation:
         y2 = height - y1 * 2
         cropped = image[y1:y2, x1:x2]
         zoomed_image = cv2.resize(cropped, (image.shape[1], image.shape[0]), interpolation=cv2.INTER_CUBIC)
-        save_image(zoomed_image)
+        save_image(zoomed_image, self.user_name)
         pass
 
     def flip(self, image):
@@ -113,7 +113,7 @@ class ImageDataAugmentation:
         # Flip code 0 = horizontal flip
         # Flip code 1 = vertical flip
         image = cv2.flip(image, flipCode=1)
-        save_image(image)
+        save_image(image, self.user_name)
         pass
 
     def adjust_brightness(self, image):
@@ -126,5 +126,5 @@ class ImageDataAugmentation:
 
         final_hsv = cv2.merge((h, s, v))
         image = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
-        save_image(image)
+        save_image(image, self.user_name)
         pass

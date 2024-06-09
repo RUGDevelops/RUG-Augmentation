@@ -1,0 +1,6 @@
+/dataset_cropped
+/runs
+.idea
+./__pycache__/
+/temporary/
+/models/
