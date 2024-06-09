@@ -1,3 +1,5 @@
+pytest
+pillow
 keras
 numpy
 opencv-python
