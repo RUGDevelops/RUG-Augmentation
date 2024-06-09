@@ -1,0 +1,11 @@
+services:
+   rug-rug_2fa:
+    container_name: "rug_2fa"
+    image: "neutralplasma/rug-2fa:latest"
+    ports:
+      - '127.0.0.1:5000:5000'
+
+
+
+
+

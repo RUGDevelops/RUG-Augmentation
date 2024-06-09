@@ -1,0 +1,22 @@
+name: "Builds docker image and deploys it to dockerhub"
+
+on: ['push']
+
+
+jobs:
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: "Checkout latest"
+        uses: actions/checkout@v4
+
+      - name: "Setup docker"
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: "Dockerize and push"
+        run: |
+          docker build . --file Dockerfile -t neutralplasma/rug-2fa
+          docker push neutralplasma/rug-2fa:latest
