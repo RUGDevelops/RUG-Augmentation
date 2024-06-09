@@ -62,10 +62,6 @@ def validate_user(user):
         return jsonify({'msg': 'error', 'error': 'Invalid face'})
 
 
-    # load face recognition model from user (user is UUID and name of model)
-    # validate face user sent
-
-
 
 @app.route("/<user>/setup", methods=['POST'])
 def setup_user(user):
@@ -82,22 +78,13 @@ def setup_user(user):
     Path(f'temporary').mkdir(parents=True, exist_ok=True)
     video.save(f'temporary/{user}.mp4')
 
-    # call the video processing function in second thread so it doesn't affect this one?
 
     try:
         ThreadClass(user)
     except Exception as e:
         print(str(e))
 
-
-
     return jsonify({'msg': 'progress', 'user': user})
-
-    # read and save the video from request
-    # get dataset from video
-    # save dataset to disk
-    # train model with dataset
-    # save model to disk
 
 
 
