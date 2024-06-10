@@ -84,7 +84,7 @@ class ModelCreator:
         data_dir = 'dataset'
         batch_size = 16
         epochs = 3
-        workers = 0 if os.name == 'nt' else 8
+        workers = 0 if os.name == 'nt' else os.cpu_count()
 
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         print('Running on device: {}'.format(device))
