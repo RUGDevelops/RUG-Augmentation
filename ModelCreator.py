@@ -29,7 +29,7 @@ class ModelCreator:
         self.model = model
         self.model_name = "model.pt"
         self.user_name = model_name
-        self.model_path = f'models/{self.user_name}.pt'
+        self.model_path = f'/models/{self.user_name}.pt'
         self.video_path = f'temporary/{self.user_name}.mp4'
         self.image_path = f"temporary/{self.user_name}.jpg"
         self.dataset_path = f'dataset/{self.user_name}'
