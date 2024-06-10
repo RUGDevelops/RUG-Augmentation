@@ -52,14 +52,14 @@ def validate_user(user):
     test = ModelCreator(None, user)
 
     if not test.does_model_exist():
-        return jsonify({'msg': 'error', 'error': 'Model for this uer doesn\'t exist'})
+        return jsonify({'msg': 'error', 'error': 'Model for this uer doesn\'t exist'}), 404
 
     is_valid = test.verify_image()
 
     if is_valid:
-        return jsonify({'msg': 'success', 'user': user, 'size': [img.width, img.height]})
+        return jsonify({'msg': 'success', 'user': user, 'size': [img.width, img.height]}), 200
     else:
-        return jsonify({'msg': 'error', 'error': 'Invalid face'})
+        return jsonify({'msg': 'error', 'error': 'Invalid face'}), 400
 
 
     # load face recognition model from user (user is UUID and name of model)
@@ -70,14 +70,14 @@ def validate_user(user):
 @app.route("/<user>/setup", methods=['POST'])
 def setup_user(user):
     if 'video' not in request.files:
-        return jsonify({'msg': 'error', 'error': 'No video file found'})
+        return jsonify({'msg': 'error', 'error': 'No video file found'}), 400
     video = request.files['video']
 
     if(video.filename == ''):
-        return jsonify({'msg': 'error', 'error': 'No selected file'})
+        return jsonify({'msg': 'error', 'error': 'No selected file'}), 400
 
     if is_busy:
-        return jsonify({'msg': 'error', 'error': 'Server is busy processing another request'})
+        return jsonify({'msg': 'error', 'error': 'Server is busy processing another request'}), 400
 
     Path(f'temporary').mkdir(parents=True, exist_ok=True)
     video.save(f'temporary/{user}.mp4')
@@ -91,7 +91,7 @@ def setup_user(user):
 
 
 
-    return jsonify({'msg': 'progress', 'user': user})
+    return jsonify({'msg': 'progress', 'user': user}), 200
 
     # read and save the video from request
     # get dataset from video
