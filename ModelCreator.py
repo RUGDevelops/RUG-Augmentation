@@ -274,4 +274,4 @@ class ModelCreator:
         #     predicted_class = torch.argmax(output, dim=1)
         #     print(predicted_class)
 
-        return probabilities[0][0] > probabilities[0][1]
+        return probabilities[0][0] > probabilities[0][1] && probabilities[0][0] > 7.0
