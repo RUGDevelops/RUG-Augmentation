@@ -82,7 +82,7 @@ class ModelCreator:
         augmentor.augment()
 
         data_dir = 'dataset'
-        batch_size = 16
+        batch_size = 64
         epochs = 3
         workers = 0 if os.name == 'nt' else os.cpu_count()
 
